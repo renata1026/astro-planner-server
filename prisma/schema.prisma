@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "cockroachdb"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id          String        @id @default(uuid())
+    firstName   String
+    lastName    String
+    email       String        @unique
+    password    String
+    profile     Profile?
+    trips       Trip[]
+    Reservation Reservation[]
+}
+
+model Profile {
+    id       String    @id @default(uuid())
+    userId   String    @unique
+    picture  String?
+    location String?
+    dob      DateTime?
+    gender   String?
+    user     User      @relation(fields: [userId], references: [id])
+}
+
+enum Location {
+    NEW_YORK_CITY
+    LOS_ANGELES
+    CHICAGO
+    TORONTO
+}
+
+model Trip {
+    id           String        @id @default(uuid())
+    location     Location
+    checkIn      DateTime
+    checkOut     DateTime
+    passengers   Int           @default(1)
+    userId       String
+    user         User          @relation(fields: [userId], references: [id])
+    reservations Reservation[]
+}
+
+model Reservation {
+    id                  String   @id @default(uuid())
+    bookingConfirmation String?
+    checkIn             String?
+    checkOut            String?
+    hotelName           String?
+    hotelPhone          String?
+    hotelLocation       String?
+    airlineName         String?
+    flightNumber        String?
+    departureAirport    String?
+    arrivalAirport      String?
+    departureDate       DateTime
+    arrivalDate         DateTime
+    carRentalAgency     String?
+    carType             String?
+    pickupLocation      String?
+    dropoffLocation     String?
+    tripId              String
+    trip                Trip     @relation(fields: [tripId], references: [id])
+    userId              String
+    user                User     @relation(fields: [userId], references: [id])
+}
+
+// model Preference {
+//   id     String @id @default(uuid())
+//   tripId String
+//   trip   Trip   @relation(fields: [tripId], references: [id])
+//   // other fields...
+// }
+
+// model RefreshToken {
+//   id        String   @id @default(uuid())
+//   userId    String
+//   user      User     @relation(fields: [userId], references: [id])
+//   token     String   @unique
+//   createdAt DateTime @default(now())
+//   expiresAt DateTime
+// }
