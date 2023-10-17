@@ -1,12 +1,13 @@
-import { PrismaClient } from '@prisma/client';
-import express from 'express';
-import cors from 'cors';
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import { PrismaClient } from "@prisma/client";
+import express from "express";
+import cors from "cors";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 dotenv.config();
-import { userRouter } from './routes/userRouter.js';
-import { reservationRouter } from './routes/reservationRouter.js';
-import { tripRouter } from './routes/tripRouter.js';
+import { userRouter } from "./routes/userRouter.js";
+import { reservationRouter } from "./routes/reservationRouter.js";
+import { tripRouter } from "./routes/tripRouter.js";
+import { profileRouter } from "./routes/profileRouter.js";
 
 const app = express();
 export const prisma = new PrismaClient();
@@ -14,8 +15,8 @@ app.use(cors());
 app.use(express.json());
 
 // Default route
-app.get('/', async (req, res) => {
-  res.send({ success: true, post: 'Welcome to the Astro Planner Server' });
+app.get("/", async (req, res) => {
+  res.send({ success: true, post: "Welcome to the Astro Planner Server" });
 });
 
 app.use(async (req, res, next) => {
@@ -27,7 +28,7 @@ app.use(async (req, res, next) => {
     }
 
     // Split the "Authorization" header to get the token (assuming it's in the format "Bearer <token>")
-    const token = req.headers.authorization.split(' ')[1];
+    const token = req.headers.authorization.split(" ")[1];
 
     // Verify the token using a JWT (JSON Web Token) library with a secret key
     const { userId } = jwt.verify(token, process.env.JWT_SECRET);
@@ -58,13 +59,14 @@ app.use(async (req, res, next) => {
   }
 });
 
-app.use('/users', userRouter);
-app.use('/reservations', reservationRouter);
-app.use('/trips', tripRouter);
+app.use("/users", userRouter);
+app.use("/reservations", reservationRouter);
+app.use("/trips", tripRouter);
+app.use("/profile", profileRouter);
 
 // 404 Route Not Found
 app.use((req, res, next) => {
-  res.status(404).send({ success: false, error: 'Route does not exist' });
+  res.status(404).send({ success: false, error: "Route does not exist" });
 });
 
 // Error Handling Middleware

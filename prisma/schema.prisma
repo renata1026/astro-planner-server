@@ -22,13 +22,16 @@ model User {
 }
 
 model Profile {
-    id       String    @id @default(uuid())
-    userId   String    @unique
-    picture  String?
-    location String?
-    dob      DateTime?
-    gender   String?
-    user     User      @relation(fields: [userId], references: [id])
+    id        String    @id @default(uuid())
+    userId    String    @unique
+    picture   String?
+    firstName String
+    lastName  String
+    email     String    @unique
+    location  String?
+    dob       DateTime?
+    gender    String?
+    user      User      @relation(fields: [userId], references: [id])
 }
 
 enum Location {
