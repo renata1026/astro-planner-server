@@ -113,3 +113,169 @@ userRouter.get('/token', async (req, res) => {
     });
   }
 });
+
+userRouter.get('/profile', async (req, res) => {
+  try {
+    // Extract the user ID from the authenticated user (you should implement authentication)
+    const userId = req.user.id;
+    //make sure user is logged in
+    if (!userId) {
+      return res.send({
+        success: false,
+        error: 'User is not authenticated.',
+      });
+    }
+    console.log(req.user);
+    // Fetch the user data and include the profile
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      include: {
+        profile: true,
+      },
+    });
+
+    if (!user) {
+      return res.send({
+        success: false,
+        error: 'User not found.',
+      });
+    }
+
+    res.send({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    return res.send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+userRouter.put('/profile', async (req, res) => {
+  try {
+    const { picture, location, dob, gender } = req.body;
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.send({
+        success: false,
+        error: 'User is not authenticated.',
+      });
+    }
+
+    // First, find the user by their ID
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        profile: true, // Include the profile in the query
+      },
+    });
+
+    if (!user) {
+      return res.send({
+        success: false,
+        error: 'User not found.',
+      });
+    }
+
+    // Check if the user has a profile
+    if (!user.profile) {
+      // If the user doesn't have a profile, you may choose to create one or return an error
+      return res.send({
+        success: false,
+        error:
+          'User profile not found. You may need to create a profile for this user.',
+      });
+    }
+
+    // Now, update the profile information
+    const updatedProfile = await prisma.profile.update({
+      where: {
+        userId: userId,
+      },
+      data: {
+        picture,
+        location,
+        dob,
+        gender,
+      },
+    });
+
+    res.send({
+      success: true,
+      user: updatedProfile,
+    });
+  } catch (error) {
+    return res.send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+userRouter.post('/profile', async (req, res) => {
+  try {
+    const { picture, location, dob, gender } = req.body;
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.send({
+        success: false,
+        error: 'User is not authenticated.',
+      });
+    }
+
+    // First, find the user by their ID
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        profile: true, // Include the profile in the query
+      },
+    });
+
+    if (!user) {
+      return res.send({
+        success: false,
+        error: 'User not found.',
+      });
+    }
+
+    // // Check if the user has a profile
+    // if (!user.profile) {
+    //   // If the user doesn't have a profile, you may choose to create one or return an error
+    //   return res.send({
+    //     success: false,
+    //     error:
+    //       'User profile not found. You may need to create a profile for this user.',
+    //   });
+    // }
+
+    // Now, update the profile information
+    const newProfile = await prisma.profile.create({
+      data: {
+        picture,
+        location,
+        dob,
+        gender,
+        userId,
+      },
+    });
+
+    res.send({
+      success: true,
+      user: newProfile,
+    });
+  } catch (error) {
+    return res.send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
