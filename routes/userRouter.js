@@ -100,6 +100,7 @@ userRouter.get('/token', async (req, res) => {
       where: {
         id: userId,
       },
+      include: { profile: true },
     });
     delete user.password;
     res.send({
