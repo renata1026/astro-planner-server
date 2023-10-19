@@ -1,17 +1,17 @@
-import express from 'express';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { prisma } from '../index.js';
+import express from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { prisma } from "../index.js";
 
 export const userRouter = express.Router();
 
-userRouter.post('/login', async (req, res) => {
+userRouter.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.send({
         success: false,
-        error: 'You must provide a username and password when logging in.',
+        error: "You must provide a username and password when logging in.",
       });
     }
     const user = await prisma.user.findUnique({
@@ -22,7 +22,7 @@ userRouter.post('/login', async (req, res) => {
     if (!user) {
       return res.send({
         success: false,
-        error: 'Email and/or password is invalid.',
+        error: "Email and/or password is invalid.",
       });
     }
 
@@ -30,7 +30,7 @@ userRouter.post('/login', async (req, res) => {
     if (!isPasswordValid) {
       return res.send({
         success: false,
-        error: 'Email and/or password is invalid.',
+        error: "Email and/or password is invalid.",
       });
     }
 
@@ -47,13 +47,13 @@ userRouter.post('/login', async (req, res) => {
   }
 });
 
-userRouter.post('/register', async (req, res) => {
+userRouter.post("/register", async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
     if (!firstName || !lastName || !email || !password) {
       return res.send({
         success: false,
-        error: 'All field are required when registering.',
+        error: "All field are required when registering.",
       });
     }
     const checkUser = await prisma.user.findFirst({
@@ -64,10 +64,11 @@ userRouter.post('/register', async (req, res) => {
     if (checkUser) {
       return res.send({
         success: false,
-        error: 'Email already exists, please login.',
+        error: "Email already exists, please login.",
       });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await prisma.user.create({
       data: {
         firstName,
@@ -89,18 +90,18 @@ userRouter.post('/register', async (req, res) => {
   }
 });
 
-userRouter.get('/token', async (req, res) => {
+userRouter.get("/token", async (req, res) => {
   try {
     if (!req.headers.authorization) {
       return next();
     }
-    const token = req.headers.authorization.split(' ')[1];
+    const token = req.headers.authorization.split(" ")[1];
     const { userId } = jwt.verify(token, process.env.JWT_SECRET);
     const user = await prisma.user.findUnique({
       where: {
         id: userId,
       },
-      include: { profile: true },
+      // include: { profile: true },
     });
     delete user.password;
     res.send({
@@ -115,7 +116,7 @@ userRouter.get('/token', async (req, res) => {
   }
 });
 
-userRouter.get('/profile', async (req, res) => {
+userRouter.get("/me", async (req, res) => {
   try {
     // Extract the user ID from the authenticated user (you should implement authentication)
     const userId = req.user.id;
@@ -123,7 +124,7 @@ userRouter.get('/profile', async (req, res) => {
     if (!userId) {
       return res.send({
         success: false,
-        error: 'User is not authenticated.',
+        error: "User is not authenticated.",
       });
     }
     console.log(req.user);
@@ -132,15 +133,12 @@ userRouter.get('/profile', async (req, res) => {
       where: {
         id: userId,
       },
-      include: {
-        profile: true,
-      },
     });
 
     if (!user) {
       return res.send({
         success: false,
-        error: 'User not found.',
+        error: "User not found.",
       });
     }
 
@@ -156,55 +154,67 @@ userRouter.get('/profile', async (req, res) => {
   }
 });
 
-userRouter.put('/profile', async (req, res) => {
+userRouter.put("/me", async (req, res) => {
   try {
-    const { picture, location, dob, gender } = req.body;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      picture,
+      location,
+      dob,
+      gender,
+    } = req.body;
+
     const userId = req.user.id;
 
     if (!userId) {
       return res.send({
         success: false,
-        error: 'User is not authenticated.',
+        error: "User is not authenticated.",
       });
     }
 
+    console.log({ firstName });
+    console.log({ lastName });
     // First, find the user by their ID
     const user = await prisma.user.findUnique({
       where: {
         id: userId,
-      },
-      include: {
-        profile: true, // Include the profile in the query
       },
     });
 
     if (!user) {
       return res.send({
         success: false,
-        error: 'User not found.',
+        error: "User not found.",
       });
     }
 
-    // Check if the user has a profile
-    if (!user.profile) {
-      // If the user doesn't have a profile, you may choose to create one or return an error
-      return res.send({
-        success: false,
-        error:
-          'User profile not found. You may need to create a profile for this user.',
-      });
-    }
+    // // Check if the user has a profile
+    // if (!user.profile) {
+    //   // If the user doesn't have a profile, you may choose to create one or return an error
+    //   return res.send({
+    //     success: false,
+    //     error:
+    //       "User profile not found. You may need to create a profile for this user.",
+    //   });
+    // }
+
+    console.log(email);
+    console.log(picture);
 
     // Now, update the profile information
-    const updatedProfile = await prisma.profile.update({
+    const updatedProfile = await prisma.user.update({
       where: {
-        userId: userId,
+        id: userId,
       },
       data: {
+        firstName,
+        lastName,
+        email,
         picture,
-        location,
-        dob,
-        gender,
       },
     });
 
@@ -219,7 +229,8 @@ userRouter.put('/profile', async (req, res) => {
     });
   }
 });
-userRouter.post('/profile', async (req, res) => {
+
+userRouter.post("/profile", async (req, res) => {
   try {
     const { picture, location, dob, gender } = req.body;
     const userId = req.user.id;
@@ -227,7 +238,7 @@ userRouter.post('/profile', async (req, res) => {
     if (!userId) {
       return res.send({
         success: false,
-        error: 'User is not authenticated.',
+        error: "User is not authenticated.",
       });
     }
 
@@ -237,14 +248,14 @@ userRouter.post('/profile', async (req, res) => {
         id: userId,
       },
       include: {
-        profile: true, // Include the profile in the query
+        // profile: true, // Include the profile in the query
       },
     });
 
     if (!user) {
       return res.send({
         success: false,
-        error: 'User not found.',
+        error: "User not found.",
       });
     }
 
