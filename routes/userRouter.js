@@ -181,15 +181,6 @@ userRouter.put("/profile", async (req, res) => {
       });
     }
 
-    // // Check if the user has a profile
-    // if (!user.profile) {
-    //   // If the user doesn't have a profile, you may choose to create one or return an error
-    //   return res.send({
-    //     success: false,
-    //     error:
-    //       "User profile not found. You may need to create a profile for this user.",
-    //   });
-    // }
 
     // Prepare the data object dynamically
     let updateData = {};
@@ -207,6 +198,8 @@ userRouter.put("/profile", async (req, res) => {
       },
       data: updateData,
     });
+
+    delete updatedProfile.password;
 
     res.send({
       success: true,
