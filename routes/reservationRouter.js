@@ -1,10 +1,10 @@
-import express from 'express';
-import { prisma } from '../index.js';
+import express from "express";
+import { prisma } from "../index.js";
 
 export const reservationRouter = express.Router();
 
 // GET / reservations;
-reservationRouter.get('/', async (req, res) => {
+reservationRouter.get("/", async (req, res) => {
   try {
     const reservation = await prisma.reservation.findMany();
     const data = {
@@ -21,7 +21,7 @@ reservationRouter.get('/', async (req, res) => {
 });
 //  POST /reservations/flights
 
-reservationRouter.post('/', async (req, res) => {
+reservationRouter.post("/", async (req, res) => {
   try {
     const {
       bookingConfirmation,
@@ -50,28 +50,27 @@ reservationRouter.post('/', async (req, res) => {
     if (!trip) {
       return res.send({
         success: false,
-        error: 'Trip not found.',
+        error: "Trip not found.",
       });
     }
 
     if (req.user.id !== trip.userId) {
       return res.send({
         success: false,
-        error: 'You must be the owner of this trip to make a reservation!',
+        error: "You must be the owner of this trip to make a reservation!",
       });
     }
 
-    // const userId = req.user ? req.user.id : null;
     if (!arrivalDate || !departureDate) {
       return res.send({
         success: false,
-        error: 'You must provide all fields to create a flight reservation',
+        error: "You must provide all fields to create a flight reservation",
       });
     }
     if (!req.user) {
       return res.send({
         success: false,
-        error: 'Login to create a flight reservation.',
+        error: "Login to create a flight reservation.",
       });
     }
     const reservation = await prisma.reservation.create({
@@ -110,8 +109,7 @@ reservationRouter.post('/', async (req, res) => {
 });
 
 //  PUT/reservations/flights
-
-reservationRouter.put('/:reservationId', async (req, res) => {
+reservationRouter.put("/:reservationId", async (req, res) => {
   const { reservationId } = req.params;
   console.log(reservationId);
   try {
@@ -142,14 +140,14 @@ reservationRouter.put('/:reservationId', async (req, res) => {
     if (!reservation) {
       return res.send({
         success: false,
-        error: 'Reservation not found.',
+        error: "Reservation not found.",
       });
     }
 
     if (req.user.id !== reservation.userId) {
       return res.send({
         success: false,
-        error: 'You must be the owner of this reservation to modify it!',
+        error: "You must be the owner of this reservation to modify it!",
       });
     }
 
@@ -157,13 +155,13 @@ reservationRouter.put('/:reservationId', async (req, res) => {
       return res.send({
         success: false,
         error:
-          'You must provide at least all mandatory fields to  modify a reservation',
+          "You must provide at least all mandatory fields to  modify a reservation",
       });
     }
     if (!req.user) {
       return res.send({
         success: false,
-        error: 'Login to modify a reservation.',
+        error: "Login to modify a reservation.",
       });
     }
     const updatedReservation = await prisma.reservation.update({
@@ -205,7 +203,7 @@ reservationRouter.put('/:reservationId', async (req, res) => {
 });
 
 // Delete reservation
-reservationRouter.delete('/:reservationId', async (req, res) => {
+reservationRouter.delete("/:reservationId", async (req, res) => {
   try {
     const { reservationId } = req.params;
     const reservation = await prisma.reservation.findUnique({
@@ -217,21 +215,21 @@ reservationRouter.delete('/:reservationId', async (req, res) => {
     if (!reservation) {
       return res.send({
         success: false,
-        error: 'Reservation not found.',
+        error: "Reservation not found.",
       });
     }
 
     if (req.user.id !== reservation.userId) {
       return res.send({
         success: false,
-        error: 'You must be the owner of this reservation to delete!',
+        error: "You must be the owner of this reservation to delete!",
       });
     }
 
     if (!req.user) {
       return res.send({
         success: false,
-        error: 'Please log in to delete a reservation.',
+        error: "Please log in to delete a reservation.",
       });
     }
 

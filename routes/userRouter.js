@@ -101,7 +101,6 @@ userRouter.get("/token", async (req, res) => {
       where: {
         id: userId,
       },
-      // include: { profile: true },
     });
     delete user.password;
     res.send({
@@ -127,7 +126,7 @@ userRouter.get("/me", async (req, res) => {
         error: "User is not authenticated.",
       });
     }
-    console.log(req.user);
+
     // Fetch the user data and include the profile
     const user = await prisma.user.findFirst({
       where: {
@@ -181,7 +180,6 @@ userRouter.put("/profile", async (req, res) => {
       });
     }
 
-
     // Prepare the data object dynamically
     let updateData = {};
 
@@ -230,9 +228,6 @@ userRouter.post("/profile", async (req, res) => {
       where: {
         id: userId,
       },
-      include: {
-        // profile: true, // Include the profile in the query
-      },
     });
 
     if (!user) {
@@ -241,16 +236,6 @@ userRouter.post("/profile", async (req, res) => {
         error: "User not found.",
       });
     }
-
-    // // Check if the user has a profile
-    // if (!user.profile) {
-    //   // If the user doesn't have a profile, you may choose to create one or return an error
-    //   return res.send({
-    //     success: false,
-    //     error:
-    //       'User profile not found. You may need to create a profile for this user.',
-    //   });
-    // }
 
     // Now, update the profile information
     const newProfile = await prisma.profile.create({
