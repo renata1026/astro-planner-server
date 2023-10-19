@@ -1,10 +1,10 @@
-import express from 'express';
-import { prisma } from '../index.js';
+import express from "express";
+import { prisma } from "../index.js";
 
 export const tripRouter = express.Router();
 
 // GET /trips
-tripRouter.get('/', async (req, res) => {
+tripRouter.get("/", async (req, res) => {
   try {
     const trip = await prisma.trip.findMany();
     const data = {
@@ -22,7 +22,7 @@ tripRouter.get('/', async (req, res) => {
 
 //  POST /trips
 
-tripRouter.post('/', async (req, res) => {
+tripRouter.post("/", async (req, res) => {
   console.log(req.user);
   try {
     const { checkIn, checkOut, passengers, location } = req.body;
@@ -30,7 +30,7 @@ tripRouter.post('/', async (req, res) => {
     if (!location || !checkIn || !checkOut || !passengers) {
       return res.send({
         success: false,
-        error: 'You must provide all fields to create a trip',
+        error: "You must provide all fields to create a trip",
       });
     }
     // if (!req.user) {
@@ -60,7 +60,7 @@ tripRouter.post('/', async (req, res) => {
   }
 });
 
-tripRouter.put('/:tripId', async (req, res) => {
+tripRouter.put("/:tripId", async (req, res) => {
   const { tripId } = req.params;
   const { checkIn, checkOut, passengers, location } = req.body;
 
@@ -68,7 +68,7 @@ tripRouter.put('/:tripId', async (req, res) => {
     if (!location || !checkIn || !checkOut || !passengers) {
       return res.send({
         success: false,
-        error: 'You must provide all fields to create a trip',
+        error: "You must provide all fields to create a trip",
       });
     }
 
@@ -81,7 +81,7 @@ tripRouter.put('/:tripId', async (req, res) => {
     if (!trip) {
       return res.send({
         success: false,
-        error: 'Trip not found.',
+        error: "Trip not found.",
       });
     }
 
@@ -95,7 +95,7 @@ tripRouter.put('/:tripId', async (req, res) => {
     if (req.user.id !== trip.userId) {
       return res.send({
         success: false,
-        error: 'You must be the owner of this trip to delete!',
+        error: "You must be the owner of this trip to delete!",
       });
     }
     const updatedTrip = await prisma.trip.update({
@@ -122,9 +122,17 @@ tripRouter.put('/:tripId', async (req, res) => {
   }
 });
 
-tripRouter.delete('/:tripId', async (req, res) => {
+tripRouter.delete("/:tripId", async (req, res) => {
   try {
     const { tripId } = req.params;
+
+    if (!req.user) {
+      return res.send({
+        success: false,
+        error: "Please log in to delete a trip.",
+      });
+    }
+
     const trip = await prisma.trip.findUnique({
       where: {
         id: tripId,
@@ -134,23 +142,22 @@ tripRouter.delete('/:tripId', async (req, res) => {
     if (!trip) {
       return res.send({
         success: false,
-        error: 'Trip not found.',
+        error: "Trip not found.",
       });
     }
 
     if (req.user.id !== trip.userId) {
       return res.send({
         success: false,
-        error: 'You must be the owner of this trip to delete!',
+        error: "You must be the owner of this trip to delete!",
       });
     }
 
-    if (!req.user) {
-      return res.send({
-        success: false,
-        error: 'Please log in to delete a trip.',
-      });
-    }
+    await prisma.reservation.deleteMany({
+      where: {
+        tripId: tripId,
+      },
+    });
 
     const deletedTrip = await prisma.trip.delete({
       where: {
