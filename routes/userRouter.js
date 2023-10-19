@@ -154,18 +154,9 @@ userRouter.get("/me", async (req, res) => {
   }
 });
 
-userRouter.put("/me", async (req, res) => {
+userRouter.put("/profile", async (req, res) => {
   try {
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      picture,
-      location,
-      dob,
-      gender,
-    } = req.body;
+    const { firstName, lastName, email, profileImage, location } = req.body;
 
     const userId = req.user.id;
 
@@ -176,8 +167,6 @@ userRouter.put("/me", async (req, res) => {
       });
     }
 
-    console.log({ firstName });
-    console.log({ lastName });
     // First, find the user by their ID
     const user = await prisma.user.findUnique({
       where: {
@@ -202,20 +191,21 @@ userRouter.put("/me", async (req, res) => {
     //   });
     // }
 
-    console.log(email);
-    console.log(picture);
+    // Prepare the data object dynamically
+    let updateData = {};
 
-    // Now, update the profile information
+    if (firstName) updateData.firstName = firstName;
+    if (lastName) updateData.lastName = lastName;
+    if (email) updateData.email = email;
+    if (profileImage) updateData.profileImage = profileImage;
+    if (location) updateData.location = location;
+    // ... Add other fields similarly
+
     const updatedProfile = await prisma.user.update({
       where: {
         id: userId,
       },
-      data: {
-        firstName,
-        lastName,
-        email,
-        picture,
-      },
+      data: updateData,
     });
 
     res.send({
@@ -232,7 +222,7 @@ userRouter.put("/me", async (req, res) => {
 
 userRouter.post("/profile", async (req, res) => {
   try {
-    const { picture, location, dob, gender } = req.body;
+    const { profileImage, location, firstName, lastName, email } = req.body;
     const userId = req.user.id;
 
     if (!userId) {
@@ -272,10 +262,8 @@ userRouter.post("/profile", async (req, res) => {
     // Now, update the profile information
     const newProfile = await prisma.profile.create({
       data: {
-        picture,
+        profileImage,
         location,
-        dob,
-        gender,
         userId,
       },
     });

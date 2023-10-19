@@ -11,36 +11,16 @@ datasource db {
 }
 
 model User {
-    id          String        @id @default(uuid())
-    firstName   String
-    lastName    String
-    email       String        @unique
-    password    String
-    location    String?
-    dob         DateTime?
-    picture     String?
-    gender      Gender?
-    trips       Trip[]
-    Reservation Reservation[]
+    id           String        @id @default(uuid())
+    firstName    String
+    lastName     String
+    email        String        @unique
+    password     String
+    location     String?
+    profileImage String?
+    trips        Trip[]
+    Reservation  Reservation[]
 }
-
-enum Gender {
-    MALE
-    FEMALE
-}
-
-// model Profile {
-//     id       String    @id @default(uuid())
-//     userId   String    @unique
-//     picture  String?
-//     // firstName String
-//     // lastName  String
-//     // email     String    @unique
-//     location String?
-//     dob      DateTime?
-//     gender   String?
-//     user     User      @relation(fields: [userId], references: [id])
-// }
 
 enum Location {
     NEW_YORK_CITY
@@ -83,19 +63,3 @@ model Reservation {
     userId              String
     user                User     @relation(fields: [userId], references: [id])
 }
-
-// model Preference {
-//   id     String @id @default(uuid())
-//   tripId String
-//   trip   Trip   @relation(fields: [tripId], references: [id])
-//   // other fields...
-// }
-
-// model RefreshToken {
-//   id        String   @id @default(uuid())
-//   userId    String
-//   user      User     @relation(fields: [userId], references: [id])
-//   token     String   @unique
-//   createdAt DateTime @default(now())
-//   expiresAt DateTime
-// }
