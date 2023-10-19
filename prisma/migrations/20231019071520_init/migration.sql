@@ -8,20 +8,10 @@ CREATE TABLE "User" (
     "lastName" STRING NOT NULL,
     "email" STRING NOT NULL,
     "password" STRING NOT NULL,
+    "location" STRING,
+    "profileImage" STRING,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Profile" (
-    "id" STRING NOT NULL,
-    "userId" STRING NOT NULL,
-    "picture" STRING,
-    "location" STRING,
-    "dob" TIMESTAMP(3),
-    "gender" STRING,
-
-    CONSTRAINT "Profile_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -63,12 +53,6 @@ CREATE TABLE "Reservation" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Profile_userId_key" ON "Profile"("userId");
-
--- AddForeignKey
-ALTER TABLE "Profile" ADD CONSTRAINT "Profile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Trip" ADD CONSTRAINT "Trip_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
